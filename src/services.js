@@ -30,3 +30,19 @@ export const getBooks = (id) => {
 
   return book;
 };
+
+export const updateBook = (id, payload) => {
+  const bookToUpdate = books.find((book) => book.id === id);
+
+  const updatedData = {
+    ...payload,
+    updatedAt: new Date().toISOString(),
+  };
+
+  const index = books.indexOf(bookToUpdate);
+  books[index] = {
+    ...bookToUpdate,
+    ...updatedData,
+  };
+  return books[index];
+};
