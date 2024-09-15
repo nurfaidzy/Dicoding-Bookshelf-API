@@ -1,9 +1,9 @@
-const express = require("express");
+import express, { json, urlencoded } from "express";
+import controller from "./controller.js";
 const app = express();
 const port = 9000;
-const controller = require("./controller");
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(json());
+app.use(urlencoded({ extended: true }));
 app.use("/", controller);
 
 app.listen(port, () => {

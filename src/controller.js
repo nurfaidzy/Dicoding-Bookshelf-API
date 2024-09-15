@@ -1,11 +1,31 @@
-const express = require("express");
-const router = express.Router();
+import { Router } from "express";
+import { addBook } from "./services.js";
+import { responseJson } from "./utils.js";
 
-router.post("/books", (req, res) => {
-    const payload = req.body;
-    console.log(payload);
+const controller = Router();
 
-  res.send("Hello Worsld!");
+controller.post("/books", (req, res) => {
+  const payload = req.body;
+  if (!payload.name) {
+    return responseJson(
+      res,
+      "fail",
+      "Gagal menambahkan buku. Mohon isi nama buku",
+      null,
+      400
+    );
+  }
+  if (payload.readPage > payload.pageCount) {
+    return responseJson(
+      res,
+      "fail",
+      "Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount",
+      null,
+      400
+    );
+  }
+  const data = addBook(payload);
+  responseJson(res, "success", "Buku berhasil ditambahkan", data, 201);
 });
 
-module.exports = router;
+export default controller;
