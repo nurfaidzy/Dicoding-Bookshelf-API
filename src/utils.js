@@ -8,25 +8,29 @@ export const createDate = () => {
   return date;
 };
 
-export const responseJson = (res, status, message, data, code) => {
+export const responseJson = (h, status, message, data, code) => {
   if (status === "fail") {
-    return res.status(code).json({
-      status,
-      message,
-    });
+    return h
+      .response({
+        status,
+        message,
+      })
+      .code(code);
   } else {
-    return res.status(code).json({
-      status,
-      message,
-      data,
-    });
+    return h
+      .response({
+        status,
+        message,
+        data,
+      })
+      .code(code);
   }
 };
 
-export const handlePageReading = (res, payload, apiStatus) => {
+export const handlePageReading = (h, payload, apiStatus) => {
   if (payload.readPage > payload.pageCount) {
-    responseJson(
-      res,
+    return responseJson(
+      h,
       "fail",
       apiStatus === "add"
         ? errApiMessage.addPagesRead
@@ -34,14 +38,14 @@ export const handlePageReading = (res, payload, apiStatus) => {
       null,
       400
     );
-    return true;
   }
+  return false;
 };
 
-export const handleNameBook = (res, payload, apiStatus) => {
+export const handleNameBook = (h, payload, apiStatus) => {
   if (!payload.name) {
-    responseJson(
-      res,
+    return responseJson(
+      h,
       "fail",
       apiStatus === "add"
         ? errApiMessage.addNameBook
@@ -49,11 +53,11 @@ export const handleNameBook = (res, payload, apiStatus) => {
       null,
       400
     );
-    return true;
   }
+  return false;
 };
 
-export const handleBookNotFound = (res, book, apiStatus) => {
+export const handleBookNotFound = (h, book, apiStatus) => {
   let message = "";
   if (apiStatus === "get") {
     message = errApiMessage.getIdNotFound;
@@ -65,7 +69,7 @@ export const handleBookNotFound = (res, book, apiStatus) => {
     message = errApiMessage.deleteIdNotFound;
   }
   if (!book) {
-    responseJson(res, "fail", message, null, 404);
-    return true;
+    return responseJson(h, "fail", message, null, 404);
   }
+  return false;
 };

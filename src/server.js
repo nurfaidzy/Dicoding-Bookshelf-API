@@ -1,11 +1,24 @@
-import express, { json, urlencoded } from "express";
-import controller from "./controller.js";
-const app = express();
-const port = 9000;
-app.use(json());
-app.use(urlencoded({ extended: true }));
-app.use("/", controller);
+import Hapi from '@hapi/hapi';
+import controller from './controller.js';
+import process from 'process';
 
-app.listen(port, () => {
-  console.info(`Example app listening on port ${port}`);
+const init = async () => {
+    const server = Hapi.server({
+        port: 9000,
+        host: 'localhost',
+    });
+
+    server.route(controller);
+
+    // Start the server
+    await server.start();
+    console.info(`Example app listening on ${server.info.uri}`);
+};
+
+// Handle unhandled rejections
+process.on('unhandledRejection', (err) => {
+    console.error(err);
+    process.exit(1);
 });
+
+init();

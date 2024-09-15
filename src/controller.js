@@ -1,4 +1,3 @@
-import { Router } from "express";
 import { addBook, deleteBook, getBooks, updateBook } from "./services.js";
 import {
   handlePageReading,
@@ -7,58 +6,84 @@ import {
   handleBookNotFound,
 } from "./utils.js";
 
-const controller = Router();
+const controller = [
+  {
+    method: "POST",
+    path: "/books",
+    handler: (request, h) => {
+      const payload = request.payload;
+      const statusBook = handleNameBook(h, payload, "add");
+      if (statusBook) return statusBook;
+      const statusPage = handlePageReading(h, payload, "add");
+      if (statusPage) return statusPage;
+      const data = addBook(payload);
+      return responseJson(h, "success", "Buku berhasil ditambahkan", data, 201);
+    },
+  },
+  {
+    method: "GET",
+    path: "/books/{id?}",
+    handler: (request, h) => {
+      const idBook = request.params.id;
+      const { reading, finished, name } = request.query;
+      const book = getBooks(idBook, reading, finished, name);
 
-controller.post("/books", (req, res) => {
-  const payload = req.body;
-  if (handleNameBook(res, payload, "add")) return;
-  if (handlePageReading(res, payload, "add")) return;
-  const data = addBook(payload);
-  responseJson(res, "success", "Buku berhasil ditambahkan", data, 201);
-});
+      if (idBook) {
+        const statusBook = handleBookNotFound(h, book, "get");
+        if (statusBook) return statusBook;
+        return responseJson(
+          h,
+          "success",
+          "Data berhasil didapatkan",
+          { book: book },
+          200
+        );
+      }
 
-controller.get("/books/:id?", (req, res) => {
-  const idBook = req.params.id;
-  const { reading, finished, name } = req.query;
-  const book = getBooks(idBook, reading, finished, name);
-
-  if (idBook) {
-    if (handleBookNotFound(res, book, "get")) return;
-    return responseJson(
-      res,
-      "success",
-      "Data berhasil didapatkan",
-      { book: book },
-      200
-    );
-  }
-
-  responseJson(
-    res,
-    "success",
-    "Data berhasil didapatkan",
-    { books: book },
-    200
-  );
-});
-
-controller.put("/books/:id?", (req, res) => {
-  const idBook = req.params.id;
-  const payload = req.body;
-  if (handleNameBook(res, payload, "update")) return;
-  if (handlePageReading(res, payload, "update")) return;
-  const book = getBooks(idBook);
-  if (handleBookNotFound(res, book, "update")) return;
-  const data = updateBook(idBook, payload);
-  responseJson(res, "success", "Buku berhasil diperbarui", { book: data }, 200);
-});
-
-controller.delete("/books/:id?", (req, res) => {
-  const idBook = req.params.id;
-  const book = getBooks(idBook);
-  if (handleBookNotFound(res, book, "delete")) return;
-  deleteBook(idBook);
-  responseJson(res, "success", "Buku berhasil dihapus", null, 200);
-});
+      return responseJson(
+        h,
+        "success",
+        "Data berhasil didapatkan",
+        { books: book },
+        200
+      );
+    },
+  },
+  {
+    method: "PUT",
+    path: "/books/{id?}",
+    handler: (request, h) => {
+      const idBook = request.params.id;
+      const payload = request.payload;
+      const statusBook = handleNameBook(h, payload, "update");
+      if (statusBook) return statusBook;
+      const statusPage = handlePageReading(h, payload, "update");
+      if (statusPage) return statusPage;
+      const book = getBooks(idBook);
+      const bookNotFound = handleBookNotFound(h, book, "update");
+      if (bookNotFound) return bookNotFound;
+      const data = updateBook(idBook, payload);
+      return responseJson(
+        h,
+        "success",
+        "Buku berhasil diperbarui",
+        { book: data },
+        200
+      );
+    },
+  },
+  {
+    method: "DELETE",
+    path: "/books/{id?}",
+    handler: (request, h) => {
+      const idBook = request.params.id;
+      const book = getBooks(idBook);
+      const bookNotFound = handleBookNotFound(h, book, "delete");
+      if (bookNotFound) return bookNotFound;
+      deleteBook(idBook);
+      return responseJson(h, "success", "Buku berhasil dihapus", null, 200);
+    },
+  },
+];
 
 export default controller;
