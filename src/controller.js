@@ -1,56 +1,13 @@
 import { Router } from "express";
 import { addBook, deleteBook, getBooks, updateBook } from "./services.js";
-import { responseJson } from "./utils.js";
-import { errApiMessage } from "./enum.js";
+import {
+  handlePageReading,
+  responseJson,
+  handleNameBook,
+  handleBookNotFound,
+} from "./utils.js";
 
 const controller = Router();
-
-const handlePageReading = (res, payload, apiStatus) => {
-  if (payload.readPage > payload.pageCount) {
-    responseJson(
-      res,
-      "fail",
-      apiStatus === "add"
-        ? errApiMessage.addPagesRead
-        : errApiMessage.updatePagesRead,
-      null,
-      400
-    );
-    return true;
-  }
-};
-
-const handleNameBook = (res, payload, apiStatus) => {
-  if (!payload.name) {
-    responseJson(
-      res,
-      "fail",
-      apiStatus === "add"
-        ? errApiMessage.addNameBook
-        : errApiMessage.updateNameBook,
-      null,
-      400
-    );
-    return true;
-  }
-};
-
-const handleBookNotFound = (res, book, apiStatus) => {
-  let message = "";
-  if (apiStatus === "get") {
-    message = errApiMessage.getIdNotFound;
-  } else if (apiStatus === "update") {
-    message = errApiMessage.updateIdNotFound;
-  } else if (apiStatus === "add") {
-    message = errApiMessage.addIdNotFound;
-  } else {
-    message = errApiMessage.deleteIdNotFound;
-  }
-  if (!book) {
-    responseJson(res, "fail", message, null, 404);
-    return true;
-  }
-};
 
 controller.post("/books", (req, res) => {
   const payload = req.body;
@@ -62,32 +19,27 @@ controller.post("/books", (req, res) => {
 
 controller.get("/books/:id?", (req, res) => {
   const idBook = req.params.id;
-  const book = getBooks(idBook);
-  if (!req.params.id) {
+  const { reading, finished, name } = req.query;
+  const book = getBooks(idBook, reading, finished, name);
+
+  if (idBook) {
+    if (handleBookNotFound(res, book, "get")) return;
     return responseJson(
       res,
       "success",
       "Data berhasil didapatkan",
-      { books: book },
+      { book: book },
       200
     );
   }
-  if (handleBookNotFound(res, book, "get")) return;
-  if (book.readPage === book.pageCount) {
-    return responseJson(
-      res,
-      "success",
-      "Data berhasil didapatkan",
-      {
-        book: {
-          ...book,
-          finished: true,
-        },
-      },
-      200
-    );
-  }
-  responseJson(res, "success", "Data berhasil didapatkan", { book: book }, 200);
+
+  responseJson(
+    res,
+    "success",
+    "Data berhasil didapatkan",
+    { books: book },
+    200
+  );
 });
 
 controller.put("/books/:id?", (req, res) => {

@@ -7,5 +7,5 @@ app.use(urlencoded({ extended: true }));
 app.use("/", controller);
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.info(`Example app listening on port ${port}`);
 });

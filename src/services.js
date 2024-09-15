@@ -6,7 +6,7 @@ export const addBook = (payload) => {
   const margeData = {
     id: nanoid(),
     ...payload,
-    finished: false,
+    finished: payload.readPage === payload.pageCount ? true : false,
     ...createDate(),
   };
   books.push(margeData);
@@ -15,20 +15,34 @@ export const addBook = (payload) => {
   };
 };
 
-export const getBooks = (id) => {
-  if (id) {
-    const book = books.find((book) => book.id === id);
-    return book;
-  }
-  const book = books.map((book) => {
+const handleBookReturn = (books) => {
+  const data = books.map((book) => {
     return {
       id: book.id,
       name: book.name,
       publisher: book.publisher,
     };
   });
+  return data;
+};
 
-  return book;
+export const getBooks = (id, reading, finished, name) => {
+  if (id) {
+    const book = books.find((book) => book.id === id);
+    return book;
+  }
+  const filteredBooks = books.filter((book) => {
+    const matchesReading = reading ? book.reading === (reading === "1") : true;
+    const matchesFinished = finished
+      ? book.finished === (finished === "1")
+      : true;
+    const matchesName = name
+      ? book.name.toLowerCase().includes(name.toLowerCase())
+      : true;
+
+    return matchesReading && matchesFinished && matchesName;
+  });
+  return handleBookReturn(filteredBooks);
 };
 
 export const updateBook = (id, payload) => {
