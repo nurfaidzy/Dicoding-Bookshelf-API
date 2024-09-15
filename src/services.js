@@ -14,3 +14,19 @@ export const addBook = (payload) => {
     bookId: margeData.id,
   };
 };
+
+export const getBooks = (id) => {
+  if (id) {
+    const book = books.find((book) => book.id === id);
+    return book;
+  }
+  const book = books.map((book) => {
+    return {
+      id: book.id,
+      name: book.name,
+      publisher: book.publisher,
+    };
+  });
+
+  return book;
+};
