@@ -8,4 +8,5 @@ export const errApiMessage = {
   updateIdNotFound: "Gagal memperbarui buku. Id tidak ditemukan",
   addNameBook: "Gagal menambahkan buku. Mohon isi nama buku",
   updateNameBook: "Gagal memperbarui buku. Mohon isi nama buku",
+  deleteIdNotFound: "Buku gagal dihapus. Id tidak ditemukan",
 };

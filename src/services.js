@@ -46,3 +46,8 @@ export const updateBook = (id, payload) => {
   };
   return books[index];
 };
+
+export const deleteBook = (id) => {
+  const index = books.findIndex((book) => book.id === id);
+  books.splice(index, 1);
+};

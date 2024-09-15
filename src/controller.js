@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addBook, getBooks, updateBook } from "./services.js";
+import { addBook, deleteBook, getBooks, updateBook } from "./services.js";
 import { responseJson } from "./utils.js";
 import { errApiMessage } from "./enum.js";
 
@@ -41,8 +41,10 @@ const handleBookNotFound = (res, book, apiStatus) => {
     message = errApiMessage.getIdNotFound;
   } else if (apiStatus === "update") {
     message = errApiMessage.updateIdNotFound;
-  } else {
+  } else if (apiStatus === "add") {
     message = errApiMessage.addIdNotFound;
+  } else {
+    message = errApiMessage.deleteIdNotFound;
   }
   if (!book) {
     responseJson(res, "fail", message, null, 404);
@@ -97,6 +99,14 @@ controller.put("/books/:id?", (req, res) => {
   if (handleBookNotFound(res, book, "update")) return;
   const data = updateBook(idBook, payload);
   responseJson(res, "success", "Buku berhasil diperbarui", { book: data }, 200);
+});
+
+controller.delete("/books/:id?", (req, res) => {
+  const idBook = req.params.id;
+  const book = getBooks(idBook);
+  if (handleBookNotFound(res, book, "delete")) return;
+  deleteBook(idBook);
+  responseJson(res, "success", "Buku berhasil dihapus", null, 200);
 });
 
 export default controller;
